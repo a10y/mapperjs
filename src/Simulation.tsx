@@ -13,8 +13,10 @@ import clsx from "clsx";
 const PLAYBACK_SCALE = [1, 2, 5, 10, 20, 60, 600];
 
 export default function Simulation({
+  filename,
   points,
 }: {
+  filename: string,
   points: Array<SimulationPoint>;
 }) {
   const gpxStreamStartTs = points[0].time;
@@ -101,7 +103,7 @@ export default function Simulation({
         <Viewer timeline={false} animation={false}>
           <Entity
             description={JSON.stringify(point, null, 2)}
-            name="Duffy House"
+            name={filename}
             point={{ pixelSize: 10 }}
             position={position}
           />

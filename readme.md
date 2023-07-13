@@ -1,5 +1,7 @@
 # mapperjs
 
+![screenshot](./screenshot.jpg)
+
 React app that renders a realtime simulation for saved GPX workouts.
 
 ## Walkthrough
