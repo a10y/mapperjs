@@ -13,16 +13,17 @@ import clsx from "clsx";
 const PLAYBACK_SCALE = [1, 2, 5, 10, 20, 60, 600];
 
 interface SimulationTimeParams {
-    simulationTimeBase: number;
-    wallTimeBase: number;
-    simulationTimeCurrent: number;
+  simulationTimeBase: number;
+  wallTimeBase: number;
+  simulationTimeCurrent: number;
+  playbackSpeed: number;
 }
 
 export default function Simulation({
   filename,
   points,
 }: {
-  filename: string,
+  filename: string;
   points: Array<SimulationPoint>;
 }) {
   // Use a new base timestamp over time.
@@ -30,25 +31,25 @@ export default function Simulation({
     simulationTimeBase: points[0].time,
     wallTimeBase: Date.now(),
     simulationTimeCurrent: points[0].time,
+    playbackSpeed: PLAYBACK_SCALE[0],
   });
-  const gpxStreamStartTs = points[0].time;
   const [haeBias, setHaeBias] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   useEffect(() => {
     console.log("mounting effect", new Date());
-    const begin = Date.now();
     const timer = setInterval(() => {
       if (paused) {
         return;
       }
 
       setSimulationTime((prev) => {
-        const deltaMs = Date.now() - begin;
+        const deltaMs = Date.now() - prev.wallTimeBase;
         return {
-            wallTimeBase: prev.wallTimeBase,
-            simulationTimeBase: prev.simulationTimeBase,
-            simulationTimeCurrent: prev.simulationTimeBase + playbackSpeed*deltaMs,
+          wallTimeBase: prev.wallTimeBase,
+          simulationTimeBase: prev.simulationTimeBase,
+          simulationTimeCurrent:
+            prev.simulationTimeBase + prev.playbackSpeed * deltaMs,
+          playbackSpeed: prev.playbackSpeed,
         };
       });
     }, 100);
@@ -56,7 +57,7 @@ export default function Simulation({
       console.log("unmounting effect", new Date());
       clearInterval(timer);
     };
-  }, [paused, playbackSpeed]);
+  }, [paused]);
 
   const point = useMemo(() => {
     for (let i = 0; i < points.length; i++) {
@@ -79,10 +80,11 @@ export default function Simulation({
             className="mx-auto my-auto text-gray-200 group-hover:text-green-500"
             onClick={() => {
               setPaused((p) => !p);
-              setSimulationTime(prev => ({
+              setSimulationTime((prev) => ({
                 simulationTimeBase: prev.simulationTimeCurrent,
                 wallTimeBase: Date.now(),
                 simulationTimeCurrent: prev.simulationTimeCurrent,
+                playbackSpeed: prev.playbackSpeed,
               }));
             }}
           >
@@ -97,14 +99,19 @@ export default function Simulation({
           </button>
         </div>
         <div className="group bg-purple-950 outline-2 outline-offset-2 outline-red-600 rounded-xl w-2/3 px-3 h-10 flex flex-col mt-6 mx-auto">
-          <label className="text-gray-200">Speed: {playbackSpeed}x</label>
+          <label className="text-gray-200">Speed: {simulationTime.playbackSpeed}x</label>
           <input
             type="range"
             min={0}
             defaultValue={0}
             max={PLAYBACK_SCALE.length - 1}
             onChange={(evt) =>
-              setPlaybackSpeed(PLAYBACK_SCALE[evt.target.valueAsNumber])
+              setSimulationTime((prev) => ({
+                simulationTimeBase: prev.simulationTimeCurrent,
+                simulationTimeCurrent: prev.simulationTimeCurrent,
+                wallTimeBase: Date.now(),
+                playbackSpeed: PLAYBACK_SCALE[evt.target.valueAsNumber!],
+              }))
             }
           />
         </div>
