@@ -12,6 +12,12 @@ import clsx from "clsx";
 
 const PLAYBACK_SCALE = [1, 2, 5, 10, 20, 60, 600];
 
+interface SimulationTimeParams {
+    simulationTimeBase: number;
+    wallTimeBase: number;
+    simulationTimeCurrent: number;
+}
+
 export default function Simulation({
   filename,
   points,
@@ -19,8 +25,13 @@ export default function Simulation({
   filename: string,
   points: Array<SimulationPoint>;
 }) {
+  // Use a new base timestamp over time.
+  const [simulationTime, setSimulationTime] = useState<SimulationTimeParams>({
+    simulationTimeBase: points[0].time,
+    wallTimeBase: Date.now(),
+    simulationTimeCurrent: points[0].time,
+  });
   const gpxStreamStartTs = points[0].time;
-  const [simulationTs, setSimulationTs] = useState(gpxStreamStartTs);
   const [haeBias, setHaeBias] = useState(0);
   const [paused, setPaused] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
@@ -32,8 +43,14 @@ export default function Simulation({
         return;
       }
 
-      const deltaMs = Date.now() - begin;
-      setSimulationTs(gpxStreamStartTs + playbackSpeed * deltaMs);
+      setSimulationTime((prev) => {
+        const deltaMs = Date.now() - begin;
+        return {
+            wallTimeBase: prev.wallTimeBase,
+            simulationTimeBase: prev.simulationTimeBase,
+            simulationTimeCurrent: prev.simulationTimeBase + playbackSpeed*deltaMs,
+        };
+      });
     }, 100);
     return () => {
       console.log("unmounting effect", new Date());
@@ -43,13 +60,13 @@ export default function Simulation({
 
   const point = useMemo(() => {
     for (let i = 0; i < points.length; i++) {
-      if (points[i].time >= simulationTs) {
+      if (points[i].time >= simulationTime.simulationTimeCurrent) {
         return points[i];
       }
     }
 
     return points[points.length - 1];
-  }, [simulationTs]);
+  }, [simulationTime]);
 
   const { lon, lat } = point;
   const position = Cartesian3.fromDegrees(lon, lat);
@@ -60,9 +77,13 @@ export default function Simulation({
         <div className="group bg-purple-950 outline-[5px] outline-cyan-500 outline-offset-2 rounded-xl w-2/3 px-3 h-10 flex mt-6 mx-auto">
           <button
             className="mx-auto my-auto text-gray-200 group-hover:text-green-500"
-            onClick={(evt) => {
-              evt.preventDefault();
+            onClick={() => {
               setPaused((p) => !p);
+              setSimulationTime(prev => ({
+                simulationTimeBase: prev.simulationTimeCurrent,
+                wallTimeBase: Date.now(),
+                simulationTimeCurrent: prev.simulationTimeCurrent,
+              }));
             }}
           >
             <p
@@ -71,7 +92,7 @@ export default function Simulation({
                 "text-green-500": !paused,
               })}
             >
-              {new Date(simulationTs).toISOString()}
+              {new Date(simulationTime.simulationTimeCurrent).toISOString()}
             </p>
           </button>
         </div>

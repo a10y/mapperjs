@@ -1,6 +1,5 @@
 // import { Viewer } from "resium";
 
-import { GpxDataSource } from "cesium";
 import { useState } from "react";
 import { SimulationPoint, loadGpx } from "./data";
 import Simulation from "./Simulation";
@@ -14,7 +13,6 @@ export default function App() {
         <Simulation filename={gpxData.filename} points={gpxData.points} />
       </>
     )
-
   } else {
     // Render picker view
     return (
