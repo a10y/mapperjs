@@ -1,10 +1,8 @@
-// import { Viewer } from "resium";
-
-import { Cartesian3 } from "cesium";
-import { useEffect, useMemo, useState } from "react";
-import { Viewer, Entity } from "resium";
+import { Cartesian3, Color, ConstantPositionProperty, Entity } from "cesium";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SimulationPoint } from "./data";
 import clsx from "clsx";
+import CesiumView from "./CesiumView";
 
 // When paused, we should clear interval for this thing.
 // When we pause, clear interval instead so counter doesn't increase.
@@ -26,6 +24,7 @@ export default function Simulation({
   filename: string;
   points: Array<SimulationPoint>;
 }) {
+  const entities = useRef<Array<Entity>>();
   // Use a new base timestamp over time.
   const [simulationTime, setSimulationTime] = useState<SimulationTimeParams>({
     simulationTimeBase: points[0].time,
@@ -71,6 +70,24 @@ export default function Simulation({
 
   const { lon, lat } = point;
   const position = Cartesian3.fromDegrees(lon, lat);
+  // We don't want to keep making new entity objects, we want to actually preserve the same ones over and over again...etc.
+  // How can we populate the remote value with this shit instead?
+  if (!entities.current) {
+    console.log("creating new entity");
+    entities.current = [
+      new Entity({
+        position: position,
+        point: {
+          color: Color.BLUE,
+          pixelSize: 20,
+        },
+        id: filename,
+        description: JSON.stringify(point, null, 2),
+      }),
+    ];
+  } else {
+    entities.current[0].position = new ConstantPositionProperty(position);
+  }
 
   return (
     <main className="w-screen h-screen flex">
@@ -99,7 +116,9 @@ export default function Simulation({
           </button>
         </div>
         <div className="group bg-purple-950 outline-2 outline-offset-2 outline-red-600 rounded-xl w-2/3 px-3 h-10 flex flex-col mt-6 mx-auto">
-          <label className="text-gray-200">Speed: {simulationTime.playbackSpeed}x</label>
+          <label className="text-gray-200">
+            Speed: {simulationTime.playbackSpeed}x
+          </label>
           <input
             type="range"
             min={0}
@@ -128,15 +147,7 @@ export default function Simulation({
       </div>
 
       <div className="w-full grow flex">
-        <Viewer timeline={false} animation={false}>
-          <Entity
-            description={JSON.stringify(point, null, 2)}
-            name={filename}
-            point={{ pixelSize: 10 }}
-            position={position}
-          />
-          {/* <CameraFlyTo destination={position} duration={5} /> */}
-        </Viewer>
+        <CesiumView entities={entities.current} />
       </div>
     </main>
   );

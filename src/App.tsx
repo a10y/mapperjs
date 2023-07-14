@@ -1,18 +1,18 @@
-// import { Viewer } from "resium";
-
 import { useState } from "react";
 import { SimulationPoint, loadGpx } from "./data";
 import Simulation from "./Simulation";
 
 export default function App() {
-  const [gpxData, setGpxData] = useState<{filename: string, points: Array<SimulationPoint>}|undefined>(undefined);
+  const [gpxData, setGpxData] = useState<
+    { filename: string; points: Array<SimulationPoint> } | undefined
+  >(undefined);
 
   if (gpxData != null) {
     return (
       <>
         <Simulation filename={gpxData.filename} points={gpxData.points} />
       </>
-    )
+    );
   } else {
     // Render picker view
     return (
@@ -30,10 +30,12 @@ export default function App() {
               upload
                 .arrayBuffer()
                 .then((buf) => new TextDecoder().decode(buf))
-                .then((gpx) => setGpxData({
-                  filename: upload.name,
-                  points: loadGpx(gpx)
-                }));
+                .then((gpx) =>
+                  setGpxData({
+                    filename: upload.name,
+                    points: loadGpx(gpx),
+                  })
+                );
             }}
           />
         </div>
