@@ -25,12 +25,11 @@ export default function Simulation({
   points: Array<SimulationPoint>;
 }) {
   const entities = useRef<Array<Entity>>();
-  // Use a new base timestamp over time.
   const [simulationTime, setSimulationTime] = useState<SimulationTimeParams>({
     simulationTimeBase: points[0].time,
     wallTimeBase: Date.now(),
     simulationTimeCurrent: points[0].time,
-    playbackSpeed: PLAYBACK_SCALE[0],
+    playbackSpeed: PLAYBACK_SCALE[3], // Default 10x playback
   });
   const [haeBias, setHaeBias] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -122,7 +121,7 @@ export default function Simulation({
           <input
             type="range"
             min={0}
-            defaultValue={0}
+            defaultValue={3}
             max={PLAYBACK_SCALE.length - 1}
             onChange={(evt) =>
               setSimulationTime((prev) => ({
