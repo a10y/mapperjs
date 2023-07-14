@@ -37,7 +37,7 @@ export default function App() {
                 );
             }}
           />
-          <p className="mx-auto  my-auto px-6 py-5 bg-slate-300 rounded-lg text-slate-800 text-xl font-sans cursor-pointer" onClick={(evt) => {
+          <p className="mx-auto  my-auto px-6 py-5 bg-slate-300 hover:bg-slate-300/80 rounded-lg text-slate-800 text-xl font-sans cursor-pointer" onClick={(evt) => {
             evt.preventDefault();
             if (uploadRef.current) {
               uploadRef.current.click();
