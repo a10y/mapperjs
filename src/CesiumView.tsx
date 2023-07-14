@@ -3,11 +3,14 @@ import { useEffect, useRef } from "react";
 
 export default function CesiumView({
   entities,
+  autoTrack,
 }: {
-  entities: Array<Cesium.Entity>;
+  entities: Array<Cesium.Entity>,
+  autoTrack?: boolean,
 }) {
   const viewerNode = useRef<HTMLDivElement>(null);
   const viewer = useRef<Cesium.Viewer>();
+  const shouldAutoTrack = autoTrack || false;
 
   useEffect(() => {
     const cartodb = Cesium.ImageryLayer.fromProviderAsync(
@@ -50,10 +53,9 @@ export default function CesiumView({
     viewer.current.entities.removeAll();
     viewer.current.entities.suspendEvents();
     for (const entity of entities) {
-      viewer.current.entities.add(entity);
+      viewer.current.trackedEntity = viewer.current.entities.add(entity);
     }
     viewer.current.entities.resumeEvents();
-    viewer.current.zoomTo(viewer.current.entities);
   }, [viewer, entities]);
 
   return <div ref={viewerNode} className="w-full h-full p-0 m-0" />;

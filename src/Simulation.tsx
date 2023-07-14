@@ -90,8 +90,8 @@ export default function Simulation({
 
   return (
     <main className="w-screen h-screen flex">
-      <div className="w-[256px] h-full bg-gray-900 flex flex-col border-r-2 border-r-green-950">
-        <div className="group bg-purple-950 outline-[5px] outline-cyan-500 outline-offset-2 rounded-xl w-2/3 px-3 h-10 flex mt-6 mx-auto">
+      <div className="w-[256px] h-full bg-[#060b13] flex flex-col">
+        <div className="group bg-black rounded-xl w-2/3 px-3 h-10 flex mt-6 mx-auto">
           <button
             className="mx-auto my-auto text-gray-200 group-hover:text-green-500"
             onClick={() => {
@@ -114,11 +114,12 @@ export default function Simulation({
             </p>
           </button>
         </div>
-        <div className="group bg-purple-950 outline-2 outline-offset-2 outline-red-600 rounded-xl w-2/3 px-3 h-10 flex flex-col mt-6 mx-auto">
+        <div className="group bg-black rounded-xl w-2/3 px-3 h-10 flex flex-col mt-6 mx-auto">
           <label className="text-gray-200">
             Speed: {simulationTime.playbackSpeed}x
           </label>
           <input
+            className="accent-slate-800"
             type="range"
             min={0}
             defaultValue={3}
@@ -133,9 +134,10 @@ export default function Simulation({
             }
           />
         </div>
-        <div className="group bg-purple-950 outline-2 outline-offset-2 outline-red-600 rounded-xl w-3/4 px-3 h-24 flex flex-col mt-6 mx-auto">
+        <div className="group bg-black rounded-xl w-3/4 px-3 h-24 flex flex-col mt-6 mx-auto">
           <label className="text-gray-200">±ele: {haeBias}</label>
           <input
+            className="accent-slate-800"
             type="range"
             min={-100}
             defaultValue={25}
