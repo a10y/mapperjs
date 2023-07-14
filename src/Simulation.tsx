@@ -15,6 +15,7 @@ interface SimulationTimeParams {
   wallTimeBase: number;
   simulationTimeCurrent: number;
   playbackSpeed: number;
+  playbackDirection: -1 | 1;
 }
 
 export default function Simulation({
@@ -24,12 +25,15 @@ export default function Simulation({
   filename: string;
   points: Array<SimulationPoint>;
 }) {
+  const minSimulationTs = points[0].time;
+  const maxSimulationTs = points[points.length - 1].time;
   const entities = useRef<Array<Entity>>();
   const [simulationTime, setSimulationTime] = useState<SimulationTimeParams>({
     simulationTimeBase: points[0].time,
     wallTimeBase: Date.now(),
     simulationTimeCurrent: points[0].time,
     playbackSpeed: PLAYBACK_SCALE[3], // Default 10x playback
+    playbackDirection: 1,
   });
   const [haeBias, setHaeBias] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -42,12 +46,24 @@ export default function Simulation({
 
       setSimulationTime((prev) => {
         const deltaMs = Date.now() - prev.wallTimeBase;
+        const nextTs =
+          prev.simulationTimeBase +
+          prev.playbackDirection * prev.playbackSpeed * deltaMs;
+        if (
+          (prev.playbackDirection === 1 && nextTs >= maxSimulationTs) ||
+          (prev.playbackDirection === -1 && nextTs <= minSimulationTs)
+        ) {
+          return {
+            ...prev,
+          };
+        }
+
         return {
           wallTimeBase: prev.wallTimeBase,
           simulationTimeBase: prev.simulationTimeBase,
-          simulationTimeCurrent:
-            prev.simulationTimeBase + prev.playbackSpeed * deltaMs,
+          simulationTimeCurrent: nextTs,
           playbackSpeed: prev.playbackSpeed,
+          playbackDirection: prev.playbackDirection,
         };
       });
     }, 100);
@@ -101,6 +117,7 @@ export default function Simulation({
                 wallTimeBase: Date.now(),
                 simulationTimeCurrent: prev.simulationTimeCurrent,
                 playbackSpeed: prev.playbackSpeed,
+                playbackDirection: prev.playbackDirection,
               }));
             }}
           >
@@ -115,8 +132,19 @@ export default function Simulation({
           </button>
         </div>
         <div className="group bg-black rounded-xl w-2/3 px-3 h-10 flex flex-col mt-6 mx-auto">
-          <label className="text-gray-200">
-            Speed: {simulationTime.playbackSpeed}x
+          <label
+            className="text-gray-200 cursor-pointer"
+            onClick={() =>
+              setSimulationTime((prev) => ({
+                ...prev,
+                wallTimeBase: Date.now(),
+                simulationTimeBase: prev.simulationTimeCurrent,
+                playbackDirection: prev.playbackDirection === -1 ? 1 : -1,
+              }))
+            }
+          >
+            Speed: {simulationTime.playbackSpeed}x{" "}
+            {simulationTime.playbackDirection === 1 ? "⏩" : "⏪"}
           </label>
           <input
             className="accent-slate-800"
@@ -130,6 +158,7 @@ export default function Simulation({
                 simulationTimeCurrent: prev.simulationTimeCurrent,
                 wallTimeBase: Date.now(),
                 playbackSpeed: PLAYBACK_SCALE[evt.target.valueAsNumber!],
+                playbackDirection: prev.playbackDirection,
               }))
             }
           />
