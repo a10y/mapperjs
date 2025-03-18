@@ -13,7 +13,7 @@ export default function CesiumView({
     const cartodb = Cesium.ImageryLayer.fromProviderAsync(
       Promise.resolve(
         new Cesium.UrlTemplateImageryProvider({
-          url: "http://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+          url: "//a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
         })
       ),
       {}
