@@ -3,14 +3,11 @@ import { useEffect, useRef } from "react";
 
 export default function CesiumView({
   entities,
-  autoTrack,
 }: {
   entities: Array<Cesium.Entity>,
-  autoTrack?: boolean,
 }) {
   const viewerNode = useRef<HTMLDivElement>(null);
   const viewer = useRef<Cesium.Viewer>();
-  const shouldAutoTrack = autoTrack || false;
 
   useEffect(() => {
     const cartodb = Cesium.ImageryLayer.fromProviderAsync(
